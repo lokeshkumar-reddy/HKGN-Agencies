@@ -440,7 +440,9 @@ function saveCartToStorage() {
    DATABASE SYNC FUNCTIONS (GLOBAL CLOUD DATABASE VIA CORS PROXY)
 ============================================================ */
 const CLOUD_DB_KEY = "hkgn_punganur_store_v2";
-const PROXY_PREFIX = "https://corsproxy.io/?";
+const PROXY_PREFIX = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? "https://corsproxy.io/?" 
+  : "/api/proxy?url=";
 
 function syncProductsFromCloud() {
   const url = `${PROXY_PREFIX}https://keyvalue.immanuel.co/api/KeyVal/GetValue/${CLOUD_DB_KEY}/hkgn_products`;
@@ -1713,13 +1715,44 @@ function handleImageUpload(input) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    state.uploadedImageBase64 = e.target.result;
-    
-    // De-select emoji cards
-    document.querySelectorAll(".img-select-option").forEach(el => el.classList.remove("active"));
-    
-    const dict = TRANSLATIONS[state.language];
-    document.getElementById("imageUploadStatus").textContent = dict.toastImageUploaded;
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      
+      // Set target dimensions (max 80px width or height for clean store thumbnail icon)
+      const MAX_WIDTH = 80;
+      const MAX_HEIGHT = 80;
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Convert to compressed JPEG data URL (quality = 0.4) to keep string size tiny (~500 bytes)
+      const compressedBase64 = canvas.toDataURL("image/jpeg", 0.4);
+      state.uploadedImageBase64 = compressedBase64;
+      
+      // De-select emoji cards
+      document.querySelectorAll(".img-select-option").forEach(el => el.classList.remove("active"));
+      
+      const dict = TRANSLATIONS[state.language];
+      document.getElementById("imageUploadStatus").textContent = dict.toastImageUploaded;
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
