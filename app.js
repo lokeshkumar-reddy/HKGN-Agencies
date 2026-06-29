@@ -368,7 +368,10 @@ document.addEventListener("DOMContentLoaded", () => {
   syncDOMTheme();
   renderApp();
 
-  // Socket.io handles database initialization automatically on connection.
+  // Async background sync with global cloud database
+  syncProductsFromCloud();
+  syncDeletedProductsFromCloud();
+  syncOrdersFromCloud();
 });
 
 function loadStateFromStorage() {
@@ -434,82 +437,155 @@ function saveCartToStorage() {
 }
 
 /* ============================================================
-   DATABASE SYNC FUNCTIONS (REAL-TIME WEBSOCKETS VIA SOCKET.IO)
+   DATABASE SYNC FUNCTIONS (GLOBAL CLOUD DATABASE VIA CORS PROXY)
 ============================================================ */
-// Establish socket connection to the current host
-const socket = io(window.location.origin);
+const CLOUD_DB_KEY = "hkgn_punganur_store_v2";
+const PROXY_PREFIX = "https://corsproxy.io/?";
 
-// Connection status handler
-socket.on("connect", () => {
-  console.log("Connected to HKGN Agencies Real-time Sync Server");
-});
+function syncProductsFromCloud() {
+  const url = `${PROXY_PREFIX}https://keyvalue.immanuel.co/api/KeyVal/GetValue/${CLOUD_DB_KEY}/hkgn_products`;
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    })
+    .then(rawString => {
+      if (!rawString || rawString === "null" || rawString.includes("An error has occurred")) {
+        // Not initialized in cloud yet, upload local/default seed data
+        syncProductsToCloud();
+        return;
+      }
+      try {
+        const data = JSON.parse(rawString);
+        if (data && Array.isArray(data) && data.length > 0) {
+          const currentStr = JSON.stringify(state.products);
+          const newStr = JSON.stringify(data);
+          
+          if (currentStr !== newStr) {
+            state.products = data;
+            localStorage.setItem("hkgn_products", newStr);
+            if (state.role === "admin") {
+              renderAdminPanel();
+            } else {
+              renderProductsGrid();
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing products from cloud:", e);
+      }
+    })
+    .catch(err => console.log("Cloud products load failed:", err));
+}
 
-// Receive initial database dump on connect
-socket.on("init_data", (data) => {
-  console.log("Loaded initial database state:", data);
-  if (data.products) {
-    state.products = data.products;
-    localStorage.setItem("hkgn_products", JSON.stringify(data.products));
-  }
-  if (data.deleted) {
-    state.deletedProducts = data.deleted;
-    localStorage.setItem("hkgn_deleted_products", JSON.stringify(data.deleted));
-  }
-  if (data.orders) {
-    state.orders = data.orders;
-    localStorage.setItem("hkgn_orders", JSON.stringify(data.orders));
-  }
-  
-  // Render active view
-  if (state.role === "admin") {
-    renderAdminPanel();
-  } else {
-    renderProductsGrid();
-  }
-});
+function syncDeletedProductsFromCloud() {
+  const url = `${PROXY_PREFIX}https://keyvalue.immanuel.co/api/KeyVal/GetValue/${CLOUD_DB_KEY}/hkgn_deleted`;
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    })
+    .then(rawString => {
+      if (!rawString || rawString === "null" || rawString.includes("An error has occurred")) {
+        syncDeletedProductsToCloud();
+        return;
+      }
+      try {
+        const data = JSON.parse(rawString);
+        if (data && Array.isArray(data)) {
+          const currentStr = JSON.stringify(state.deletedProducts);
+          const newStr = JSON.stringify(data);
+          
+          if (currentStr !== newStr) {
+            state.deletedProducts = data;
+            localStorage.setItem("hkgn_deleted_products", newStr);
+            if (state.role === "admin" && state.activeAdminTab === "recycle") {
+              renderAdminPanel();
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing deleted products from cloud:", e);
+      }
+    })
+    .catch(err => console.log("Cloud deleted load failed:", err));
+}
 
-// Listen for updates broadcast by other clients
-socket.on("products_updated", (data) => {
-  console.log("Products updated in real-time:", data);
-  state.products = data;
-  localStorage.setItem("hkgn_products", JSON.stringify(data));
-  if (state.role === "admin") {
-    renderAdminPanel();
-  } else {
-    renderProductsGrid();
-  }
-});
+function syncOrdersFromCloud() {
+  const url = `${PROXY_PREFIX}https://keyvalue.immanuel.co/api/KeyVal/GetValue/${CLOUD_DB_KEY}/hkgn_orders`;
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    })
+    .then(rawString => {
+      if (!rawString || rawString === "null" || rawString.includes("An error has occurred")) {
+        syncOrdersToCloud();
+        return;
+      }
+      try {
+        const data = JSON.parse(rawString);
+        if (data && Array.isArray(data)) {
+          const currentStr = JSON.stringify(state.orders);
+          const newStr = JSON.stringify(data);
+          
+          if (currentStr !== newStr) {
+            state.orders = data;
+            localStorage.setItem("hkgn_orders", newStr);
+            if (state.role === "admin" && state.activeAdminTab === "orders") {
+              renderAdminPanel();
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing orders from cloud:", e);
+      }
+    })
+    .catch(err => console.log("Cloud orders load failed:", err));
+}
 
-socket.on("deleted_updated", (data) => {
-  console.log("Deleted bin updated in real-time:", data);
-  state.deletedProducts = data;
-  localStorage.setItem("hkgn_deleted_products", JSON.stringify(data));
-  if (state.role === "admin" && state.activeAdminTab === "recycle") {
-    renderAdminPanel();
-  }
-});
-
-socket.on("orders_updated", (data) => {
-  console.log("Orders database updated in real-time:", data);
-  state.orders = data;
-  localStorage.setItem("hkgn_orders", JSON.stringify(data));
-  if (state.role === "admin" && state.activeAdminTab === "orders") {
-    renderAdminPanel();
-  }
-});
-
-// Socket emit helpers
 function syncProductsToCloud() {
-  socket.emit("update_products", state.products);
+  const payload = JSON.stringify(state.products);
+  const url = `${PROXY_PREFIX}https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${CLOUD_DB_KEY}/hkgn_products/${encodeURIComponent(payload)}`;
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Length": "0" }
+  })
+  .catch(err => console.error("Error pushing products to cloud:", err));
 }
 
 function syncDeletedProductsToCloud() {
-  socket.emit("update_deleted", state.deletedProducts);
+  const payload = JSON.stringify(state.deletedProducts);
+  const url = `${PROXY_PREFIX}https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${CLOUD_DB_KEY}/hkgn_deleted/${encodeURIComponent(payload)}`;
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Length": "0" }
+  })
+  .catch(err => console.error("Error pushing deleted products to cloud:", err));
 }
 
 function syncOrdersToCloud() {
-  socket.emit("update_orders", state.orders);
+  const payload = JSON.stringify(state.orders);
+  const url = `${PROXY_PREFIX}https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${CLOUD_DB_KEY}/hkgn_orders/${encodeURIComponent(payload)}`;
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Length": "0" }
+  })
+  .catch(err => console.error("Error pushing orders to cloud:", err));
 }
+
+// Start background real-time polling every 2 seconds for ultra-fast multi-device synchronization
+setInterval(() => {
+  // Avoid checking if client is actively typing inside search bars or admin stock fields to prevent cursor jumping
+  const isTyping = document.activeElement && 
+    (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA");
+  
+  if (!isTyping) {
+    syncProductsFromCloud();
+    syncDeletedProductsFromCloud();
+    syncOrdersFromCloud();
+  }
+}, 2000);
 
 /* ============================================================
    THEMING
