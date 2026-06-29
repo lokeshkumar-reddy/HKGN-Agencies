@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HKGN Agencies — Pesticides, Fertilisers & Seeds</title>
+  <meta name="description" content="Premium agricultural store in Punganur. Buy quality fertilisers, seeds, and pesticides directly via WhatsApp." />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css?v=2.0.0" />
+</head>
+<body class="dark-theme">
+
+  <!-- ============================================================
+       TOP HEADER & NAVIGATION
+  ============================================================ -->
+  <header class="header">
+    <div class="header-container">
+      <!-- Logo -->
+      <a href="#" class="logo" onclick="showCatalogView()">
+        <span class="logo-icon">🌿</span>
+        <div>
+          <span class="logo-text" id="logoText">HKGN <span class="logo-accent">AGENCIES</span></span>
+          <span class="logo-sub" id="logoSub">Pesticides, Fertilisers & Seeds</span>
+        </div>
+      </a>
+
+      <!-- Search bar (Only shown in Catalog View) -->
+      <div class="search-wrapper" id="headerSearchWrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search crops care products..." oninput="handleSearch(this.value)" />
+      </div>
+
+      <!-- Action items -->
+      <div class="header-actions">
+        <!-- Bilingual Language Selector -->
+        <div class="lang-selector">
+          <button class="lang-btn active" id="langBtnEn" onclick="setLanguage('en')">English</button>
+          <button class="lang-btn" id="langBtnTe" onclick="setLanguage('te')">తెలుగు</button>
+        </div>
+
+        <!-- Role Toggler -->
+        <div class="role-container">
+          <button class="role-badge" id="roleToggleBtn" onclick="toggleRole()">
+            👤 <span id="roleLabel">User</span>
+          </button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="action-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+          <span>🌙</span>
+        </button>
+
+        <!-- Shopping Bag Trigger -->
+        <button class="action-btn" id="bagBtn" onclick="toggleCartDrawer(true)" title="Shopping Bag">
+          <span>👜</span>
+          <span class="btn-badge" id="bagCount">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO SHOWCASE SECTION (Only in User mode, Catalog View)
+  ============================================================ -->
+  <section class="hero" id="heroSection">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-tag" id="heroTag">✨ Quality Crops Care since 2012</div>
+        <h1 class="hero-title" id="heroTitle">Grow Richer Yields<br><span class="gradient-text">With HKGN Products</span></h1>
+        <p class="hero-desc" id="heroDesc">We supply high-standard chemical pesticides, organic fertilisers, and hybrid high-yielding seeds. Authorized dealer for top agricultural brands.</p>
+        
+        <div class="hero-details-row">
+          <div class="hero-chip" id="heroChip1">🚜 100% Genuine</div>
+          <div class="hero-chip" id="heroChip2">💧 Organic Options</div>
+          <div class="hero-chip" id="heroChip3">📞 Expert Guidance</div>
+        </div>
+        <button class="btn-primary" onclick="scrollToCatalog()">
+          <span id="heroBtnText">🛒 Shop Catalog</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-orb"></div>
+        <!-- Modern leaf/sprout icon rendering -->
+        <span style="font-size: 15rem; z-index: 2;" class="hero-image">🌾</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MAIN STORE CONTAINER (User Catalog View)
+  ============================================================ -->
+  <main class="store-section" id="userStoreSection">
+    <div class="store-layout">
+      
+      <!-- Left Sidebar Filters -->
+      <aside class="sidebar-filters glass-card">
+        <div class="filter-header">
+          <h3 id="filterTitle">Categories</h3>
+          <button class="filter-reset-btn" id="filterResetBtn" onclick="clearFilters()">Reset</button>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="filter-group">
+          <div class="category-pills">
+            <button class="category-pill active" id="catAll" onclick="setCategory('all', this)">All Products</button>
+            <button class="category-pill" id="catFertilisers" onclick="setCategory('fertilisers', this)">Fertilisers</button>
+            <button class="category-pill" id="catPesticides" onclick="setCategory('pesticides', this)">Pesticides</button>
+            <button class="category-pill" id="catSeeds" onclick="setCategory('seeds', this)">Seeds</button>
+          </div>
+        </div>
+
+        <!-- Shop Info Card -->
+        <div class="sidebar-info-card">
+          <h5 id="infoCardTitle">HKGN Agencies</h5>
+          <p id="infoCardProp">Proprietor: Siddiq Basha</p>
+          <p id="infoCardAddress">📍 R.T.C Busstand Road, Punganur - 517247</p>
+          <p id="infoCardCell">📞 Cell: 90004 76878, 90598 47718</p>
+          <p id="infoCardGST">GSTIN: 37DTOPS6450N1ZN</p>
+        </div>
+      </aside>
+
+      <!-- Right Catalog Products Grid -->
+      <section class="catalog">
+        <div class="catalog-toolbar">
+          <div class="catalog-info">
+            <span class="catalog-count" id="productCountText">Showing products</span>
+          </div>
+          <div class="catalog-sort">
+            <label for="sortSelect" id="sortLabel">Sort By:</label>
+            <select id="sortSelect" class="sort-select" onchange="handleSort(this.value)">
+              <option value="name" id="optSortName">Alphabetical</option>
+              <option value="price-low" id="optSortPriceLow">Price: Low to High</option>
+              <option value="price-high" id="optSortPriceHigh">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="products-grid" id="productsGrid">
+          <!-- Dynamic cards injected by JS -->
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state text-center" id="emptyState" style="display:none; padding: 40px;">
+          <span style="font-size: 3rem;">🔍</span>
+          <h3 id="emptyTitle" style="margin: 15px 0;">No products found</h3>
+          <p id="emptyDesc" style="color:var(--text-secondary); margin-bottom: 20px;">Try typing a different name or matching category filters.</p>
+          <button class="btn-primary" id="emptyBtn" onclick="clearFilters()">Clear Filters</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============================================================
+       CHECKOUT VIEW (Replaces Store catalog when active)
+  ============================================================ -->
+  <main class="store-section checkout-view" id="checkoutSection">
+    <div class="checkout-grid">
+      
+      <!-- Checkout Forms -->
+      <div class="checkout-main">
+        <!-- Form card -->
+        <div class="glass-card checkout-form-section">
+          <h3 class="checkout-title"><span id="chkTitleStep1">1</span> <span id="chkHeadingCust">Customer Information</span></h3>
+          
+          <div class="form-group">
+            <label for="custName" id="lblCustName">Full Name / booking person name</label>
+            <input type="text" id="custName" class="form-input" placeholder="Enter name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="custMobile" id="lblCustMobile">Mobile Number</label>
+            <input type="tel" id="custMobile" class="form-input" placeholder="Enter 10-digit mobile number" required />
+          </div>
+
+          <div class="form-group">
+            <label for="custAddress" id="lblCustAddress">Delivery Address</label>
+            <textarea id="custAddress" class="form-input" rows="3" placeholder="Enter full delivery address" required></textarea>
+          </div>
+        </div>
+
+        <!-- Payment selector -->
+        <div class="glass-card checkout-form-section">
+          <h3 class="checkout-title"><span id="chkTitleStep2">2</span> <span id="chkHeadingPay">Payment Mode</span></h3>
+          
+          <div class="payment-modes" style="grid-template-columns: 1fr;">
+            <div class="payment-btn active" id="payModeCod" style="cursor: default; pointer-events: none;">
+              <span class="payment-btn-icon">💵</span>
+              <span id="payLabelCod">Cash on Delivery</span>
+            </div>
+          </div>
+          <!-- Hidden placeholder to prevent JS errors on lockedAmountDisplay -->
+          <div id="lockedAmountDisplay" style="display:none;">₹0.00</div>
+        </div>
+      </div>
+
+      <!-- Order Summary Column -->
+      <aside class="glass-card checkout-form-section" style="height: fit-content;">
+        <h3 id="orderSummaryTitle" style="font-size: 1.2rem; margin-bottom: 20px; border-bottom: 1px solid var(--panel-border); padding-bottom: 10px;">Order Summary</h3>
+        <div id="checkoutSummaryItems">
+          <!-- Items list injected here -->
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px solid var(--panel-border); padding-top: 15px;">
+          <div class="summary-row" style="font-weight: 600;">
+            <span id="sumSubtotal">Subtotal</span>
+            <span id="chkSubtotalVal">₹0.00</span>
+          </div>
+          <div class="summary-row total">
+            <span id="sumTotal">Total Amount</span>
+            <span id="chkTotalVal">₹0.00</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn-primary btn-full btn-lg" onclick="submitOrder()">
+            <span id="btnPlaceOrder">💬 Place Order on WhatsApp</span>
+          </button>
+          <button class="btn-secondary btn-full" onclick="showCatalogView()">
+            <span id="btnBackToShop">🏪 Back to Shop</span>
+          </button>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- ============================================================
+       ADMIN PANEL VIEW (Replaces storefront when active)
+  ============================================================ -->
+  <main class="admin-section" id="adminSection" style="display:none;">
+    <div class="admin-header-row">
+      <div>
+        <h2 id="adminPanelHeading">🛠️ Store Control Center</h2>
+        <p id="adminPanelSubheading" style="color:var(--text-secondary);">Manage HKGN product listings, update stocks, and restore items.</p>
+      </div>
+      
+      <!-- Open Add Product Modal Trigger -->
+      <button class="btn-primary" onclick="openAddProductModal()">
+        <span id="adminBtnAddNew">+ Add New Product</span>
+      </button>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" id="tabCatalog" onclick="switchAdminTab('catalog')">Active Catalog</button>
+      <button class="admin-tab-btn" id="tabRecycle" onclick="switchAdminTab('recycle')">Deleted Products Bin</button>
+      <button class="admin-tab-btn" id="tabOrders" onclick="switchAdminTab('orders')">Orders List</button>
+    </div>
+
+    <!-- Admin Active Catalog Tab -->
+    <div id="adminTabCatalogContent" class="glass-card" style="padding: 24px;">
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th id="thImage">Image</th>
+              <th id="thName">Product Name</th>
+              <th id="thCategory">Category</th>
+              <th id="thPrice">Price</th>
+              <th id="thStock">Stock Level</th>
+              <th id="thActions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminCatalogTableBody">
+            <!-- Dynamic rows injected here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Recycle Bin Tab -->
+    <div id="adminTabRecycleContent" class="glass-card" style="padding: 24px; display:none;">
+      <h3 id="recycleTitle" style="font-size: 1.1rem; margin-bottom: 15px; color: var(--accent-color);">Deleted Product History</h3>
+      <p id="recycleDesc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">These products were added previously and then deleted. Click on any product card to re-add/restore it to the shop catalog.</p>
+      
+      <div class="recycle-bin-grid" id="adminRecycleBinGrid">
+        <!-- Re-addable product cards injected here -->
+      </div>
+    </div>
+
+    <!-- Admin Orders Tab -->
+    <div id="adminTabOrdersContent" class="glass-card" style="padding: 24px; display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+        <h3 id="ordersTitle" style="font-size: 1.1rem; margin-bottom: 0; color: var(--primary-color);">Customer Bookings / Orders</h3>
+        <button class="btn-primary btn-sm" onclick="exportOrdersToExcel()" id="btnExportOrders" style="display:flex; align-items:center; gap:6px;">📥 Export to Excel</button>
+      </div>
+      <div id="adminOrdersContainer">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       STORE FOOTER & SHARE BUTTONS
+  ============================================================ -->
+  <footer class="store-footer">
+    <div class="footer-container">
+      <div class="footer-info">
+        <span class="footer-logo">🌿 HKGN Agencies</span>
+        <p class="footer-tagline" id="footerTagline">Quality Pesticides, Fertilisers & Seeds in Punganur, India.</p>
+        <p class="footer-credits" id="footerCredits">© 2026 HKGN Agencies. All Rights Reserved.</p>
+      </div>
+      
+      <div class="footer-share">
+        <span class="share-title" id="shareTitle">Share This Store:</span>
+        <div class="share-buttons">
+          <button class="share-btn whatsapp" onclick="shareStore('whatsapp')" title="Share on WhatsApp">
+            <span>💬 <span id="shareBtnWhatsappText">WhatsApp</span></span>
+          </button>
+          <button class="share-btn link" onclick="shareStore('copy')" title="Copy Store Link">
+            <span>🔗 <span id="shareBtnCopyText">Copy Link</span></span>
+          </button>
+          <button class="share-btn email" onclick="shareStore('email')" title="Share via Email">
+            <span>✉️ <span id="shareBtnEmailText">Email</span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       SHOPPING BAG SIDEBAR DRAWER (SLIDE OUT)
+  ============================================================ -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCartDrawer(false)"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <h3 id="bagDrawerTitle">Shopping Bag</h3>
+      <button class="drawer-close" onclick="toggleCartDrawer(false)">✕</button>
+    </div>
+
+    <div class="drawer-content" id="bagDrawerItems">
+      <!-- Items dynamically populated here -->
+    </div>
+
+    <div class="drawer-footer" id="bagDrawerFooter" style="display:none;">
+      <div class="price-breakdown" style="margin-bottom: 20px;">
+        <div class="summary-row">
+          <span id="bagSubtotal">Subtotal</span>
+          <span id="bagSubtotalVal">₹0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span id="bagTotal">Total</span>
+          <span id="bagTotalVal">₹0.00</span>
+        </div>
+      </div>
+      <button class="btn-primary btn-full btn-lg" onclick="checkoutFromBag()">
+        <span id="btnProceedCheckout">🔒 Proceed to Checkout</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ADD NEW PRODUCT MODAL (ADMIN ONLY)
+  ============================================================ -->
+  <div class="modal-overlay" id="addProductModal" onclick="closeAddProductModal(event)">
+    <div class="modal-card glass-card" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeAddProductModal(null)">✕</button>
+      <h3 class="modal-title" id="addProductModalTitle">Add New Product</h3>
+      <p class="modal-desc" id="addProductModalDesc">Create a new agricultural product listing. This will immediately show up in the catalog for all customers.</p>
+      
+      <form id="addProductForm" onsubmit="handleAddProductSubmit(event)">
+        <div class="form-group">
+          <label for="newProdName" id="lblNewProdName">Product Name</label>
+          <input type="text" id="newProdName" class="form-input" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="newProdCategory" id="lblNewProdCategory">Category</label>
+          <select id="newProdCategory" class="form-input" style="background: rgba(0,0,0,0.3);" required>
+            <option value="fertilisers" id="optNewFertilisers">Fertilisers</option>
+            <option value="pesticides" id="optNewPesticides">Pesticides</option>
+            <option value="seeds" id="optNewSeeds">Seeds</option>
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label for="newProdPrice" id="lblNewProdPrice">Price (₹)</label>
+            <input type="number" id="newProdPrice" class="form-input" min="0" step="1" required />
+          </div>
+          <div class="form-group">
+            <label for="newProdStock" id="lblNewProdStock">Initial Stock</label>
+            <input type="number" id="newProdStock" class="form-input" min="0" step="1" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="newProdDesc" id="lblNewProdDesc">Description</label>
+          <textarea id="newProdDesc" class="form-input" rows="3" required></textarea>
+        </div>
+
+        <!-- Product Image selector -->
+        <div class="form-group">
+          <label id="lblNewProdImage">Choose Product Icon or Upload</label>
+          <div class="img-select-grid">
+            <div class="img-select-option active" data-img-emoji="🌾" onclick="selectNewProductEmoji('🌾', this)">
+              <span style="font-size:2rem;">🌾</span>
+            </div>
+            <div class="img-select-option" data-img-emoji="🧪" onclick="selectNewProductEmoji('🧪', this)">
+              <span style="font-size:2rem;">🧪</span>
+            </div>
+            <div class="img-select-option" data-img-emoji="🌻" onclick="selectNewProductEmoji('🌻', this)">
+              <span style="font-size:2rem;">🌻</span>
+            </div>
+            <div class="img-select-option" data-img-emoji="📦" onclick="selectNewProductEmoji('📦', this)">
+              <span style="font-size:2rem;">📦</span>
+            </div>
+          </div>
+          <!-- Custom image upload -->
+          <div class="file-upload-wrapper">
+            <input type="file" id="newProdImageFile" class="file-upload-input" accept="image/*" onchange="handleImageUpload(this)" />
+            <span class="file-upload-btn" id="btnUploadImage">📂 Or Upload Shop Image File</span>
+          </div>
+          <div id="imageUploadStatus" style="font-size: 0.75rem; margin-top: 5px; color: var(--primary-color);"></div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 24px;">
+          <button type="button" class="btn-secondary" onclick="closeAddProductModal(null)">
+            <span id="btnAddProdCancel">Cancel</span>
+          </button>
+          <button type="submit" class="btn-primary">
+            <span id="btnAddProdSubmit">Add Listing</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       RE-ADD / CONFIRMATION MODAL POPUP
+  ============================================================ -->
+  <div class="modal-overlay" id="confirmRestoreModal" onclick="closeRestoreModal(false)">
+    <div class="modal-card glass-card" onclick="event.stopPropagation()">
+      <h3 class="modal-title" id="restoreModalTitle">Restore Product</h3>
+      <p class="modal-desc" id="restoreModalDesc">Do you want to add this product again to the catalog?</p>
+      
+      <div class="modal-actions" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end;">
+        <button class="btn-secondary" onclick="closeRestoreModal(false)">
+          <span id="restoreModalCancel">No</span>
+        </button>
+        <button class="btn-danger" onclick="permanentlyDeleteProductFromBin()">
+          <span id="restoreModalDeletePerm">Delete Permanently</span>
+        </button>
+        <button class="btn-accent" onclick="closeRestoreModal(true)">
+          <span id="restoreModalConfirm">Yes, Add This Product</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ADMIN LOGIN MODAL
+  ============================================================ -->
+  <div class="modal-overlay" id="adminLoginModal" onclick="closeAdminLoginModal(event)">
+    <div class="modal-card glass-card" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeAdminLoginModal(null)">✕</button>
+      <h3 class="modal-title" id="adminLoginTitle">Admin Portal Login</h3>
+      <p class="modal-desc" id="adminLoginDesc">Please enter the administrator credentials to access the store control center.</p>
+      
+      <form id="adminLoginForm" onsubmit="handleAdminLoginSubmit(event)">
+        <div class="form-group">
+          <label for="adminPhoneInput" id="lblAdminPhone">Admin Number</label>
+          <input type="text" id="adminPhoneInput" class="form-input" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="adminPassInput" id="lblAdminPass">Password</label>
+          <input type="password" id="adminPassInput" class="form-input" required />
+        </div>
+
+        <div class="modal-actions" style="margin-top: 24px;">
+          <button type="button" class="btn-secondary" onclick="closeAdminLoginModal(null)">
+            <span id="btnAdminLoginCancel">Cancel</span>
+          </button>
+          <button type="submit" class="btn-primary">
+            <span id="btnAdminLoginSubmit">Login</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TOAST CONTAINER
+  ============================================================ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+
+  <!-- Scripts -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="app.js?v=2.0.0"></script>
+</body>
+</html>
