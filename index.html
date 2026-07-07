@@ -460,51 +460,47 @@
   </div>
 
   <!-- ============================================================
-       ADMIN LOGIN MODAL
+       LANDING PORTAL ENTRY GATE
   ============================================================ -->
-  <div class="modal-overlay" id="adminLoginModal" onclick="closeAdminLoginModal(event)">
-    <div class="modal-card glass-card" onclick="event.stopPropagation()">
-      <button class="modal-close-btn" onclick="closeAdminLoginModal(null)">✕</button>
-      <h3 class="modal-title" id="adminLoginTitle">Admin Portal Login</h3>
-      <p class="modal-desc" id="adminLoginDesc">Please enter the administrator credentials to access the store control center.</p>
-      
-      <form id="adminLoginForm" onsubmit="handleAdminLoginSubmit(event)">
-        <div class="form-group">
-          <label for="adminPhoneInput" id="lblAdminPhone">Admin Number</label>
-          <input type="text" id="adminPhoneInput" class="form-input" required />
-        </div>
-        
-        <div class="form-group">
-          <label for="adminPassInput" id="lblAdminPass">Password</label>
-          <input type="password" id="adminPassInput" class="form-input" required />
-        </div>
-
-        <div class="modal-actions" style="margin-top: 24px;">
-          <button type="button" class="btn-secondary" onclick="closeAdminLoginModal(null)">
-            <span id="btnAdminLoginCancel">Cancel</span>
-          </button>
-          <button type="submit" class="btn-primary">
-            <span id="btnAdminLoginSubmit">Login</span>
-          </button>
-        </div>
-      </form>
+  <div class="portal-gate-overlay active" id="portalGate">
+    <div class="portal-gate-language">
+      <button class="btn-text lang-pill active" id="gateLangEn" onclick="setLanguage('en')">English</button>
+      <button class="btn-text lang-pill" id="gateLangTe" onclick="setLanguage('te')">తెలుగు</button>
     </div>
-  </div>
-
-  <!-- ============================================================
-       USER AUTHENTICATION MODAL
-  ============================================================ -->
-  <div class="modal-overlay" id="authModal" onclick="closeAuthModalOnOverlay(event)">
-    <div class="modal-card glass-card">
-      <div class="modal-header">
-        <h3 id="authModalTitle">Sign In to Your Account</h3>
-        <span class="close-btn" onclick="toggleAuthModal(false)">&times;</span>
+    
+    <div class="portal-gate-card glass-card">
+      <div class="portal-gate-logo">
+        <span class="logo-emoji">🌾</span>
+        <span class="logo-text">HKGN Agencies</span>
       </div>
-      
-      <div class="modal-body auth-modal-body">
-        <p class="auth-subtitle" id="authSubtitle">Select a method to log in and unlock fast checkout.</p>
+
+      <!-- STEP 1: Portal selection choice -->
+      <div class="gate-view" id="gatePortalChoice">
+        <h2 id="gateTitle">Welcome to HKGN Agencies</h2>
+        <p class="gate-desc" id="gateDesc">Please select your portal to continue.</p>
         
-        <!-- Google login -->
+        <div class="portal-choices-grid">
+          <div class="portal-choice-card" onclick="switchGateView('customer')">
+            <span class="choice-icon">👤</span>
+            <h4 id="choiceCustTitle">Customer Portal</h4>
+            <p id="choiceCustDesc">Sign in to place orders, check stock levels and view prices.</p>
+          </div>
+          
+          <div class="portal-choice-card" onclick="switchGateView('admin')">
+            <span class="choice-icon">🛠️</span>
+            <h4 id="choiceAdminTitle">Admin Portal</h4>
+            <p id="choiceAdminDesc">Manage crop products catalog, orders and update stocks.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2A: Customer authentication view -->
+      <div class="gate-view" id="gateCustomerAuth" style="display: none;">
+        <button class="btn-back-arrow" onclick="switchGateView('choice')">← <span id="gateBackLabel">Back</span></button>
+        <h3 id="custAuthTitle">Customer Sign In</h3>
+        <p class="gate-desc" id="custAuthDesc">Sign in via Google or WhatsApp mobile number.</p>
+        
+        <!-- Google Fast Login -->
         <div class="auth-section google-auth-section">
           <div id="googleButtonContainer"></div>
           <button class="btn-secondary google-mock-btn" id="btnGoogleMock" onclick="simulateGoogleLogin()">
@@ -529,7 +525,7 @@
             <span id="btnSendOtpText">Send OTP Code</span>
           </button>
           
-          <!-- OTP Verification Area (Hidden by default) -->
+          <!-- OTP Verification Area -->
           <div class="otp-verification-wrapper" id="otpVerificationWrapper" style="display: none;">
             <p class="otp-hint" id="otpHint">Enter the 6-digit code sent to your WhatsApp number.</p>
             <div class="otp-inputs-row">
@@ -559,8 +555,31 @@
             </button>
           </div>
         </div>
-
       </div>
+
+      <!-- STEP 2B: Admin credentials login view -->
+      <div class="gate-view" id="gateAdminAuth" style="display: none;">
+        <button class="btn-back-arrow" onclick="switchGateView('choice')">← <span id="gateBackLabelAdmin">Back</span></button>
+        <h3 id="adminLoginTitle">Admin Portal Login</h3>
+        <p class="gate-desc" id="adminLoginDesc">Please enter the administrator credentials to access the store control center.</p>
+        
+        <form id="adminLoginForm" onsubmit="handleAdminLoginSubmit(event)">
+          <div class="form-group" style="text-align: left;">
+            <label for="adminPhoneInput" id="lblAdminPhone">Admin Number</label>
+            <input type="text" id="adminPhoneInput" class="form-input" required />
+          </div>
+          
+          <div class="form-group" style="text-align: left;">
+            <label for="adminPassInput" id="lblAdminPass">Password</label>
+            <input type="password" id="adminPassInput" class="form-input" required />
+          </div>
+
+          <button type="submit" class="btn-primary auth-action-btn" style="margin-top: 15px;">
+            <span id="btnAdminLoginSubmit">Login</span>
+          </button>
+        </form>
+      </div>
+
     </div>
   </div>
 

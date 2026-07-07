@@ -32,7 +32,7 @@ export default async function handler(req, res) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
   // Admin WhatsApp number for the deep link fallback
-  const ADMIN_WHATSAPP = process.env.ADMIN_WHATSAPP_NUMBER || "919985958786"; 
+  const ADMIN_WHATSAPP = process.env.ADMIN_WHATSAPP_NUMBER || "919391595381"; 
   const messageText = `I am verifying my mobile number on HKGN Agencies. My OTP code is: ${otp}`;
   const whatsappDeepLink = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(messageText)}`;
 

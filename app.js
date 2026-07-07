@@ -163,7 +163,17 @@ const TRANSLATIONS = {
     toastOtpInvalid: "Invalid OTP code. Please try again.",
     profileTitle: "User Profile",
     profileRole: "Role: Customer",
-    profileLogout: "Log Out"
+    profileLogout: "Log Out",
+    gateTitle: "Welcome to HKGN Agencies",
+    gateDesc: "Please select your portal to continue.",
+    choiceCustTitle: "Customer Portal",
+    choiceCustDesc: "Sign in to place orders, check stock levels and view prices.",
+    choiceAdminTitle: "Admin Portal",
+    choiceAdminDesc: "Manage crop products catalog, orders and update stocks.",
+    custAuthTitle: "Customer Sign In",
+    custAuthDesc: "Sign in via Google or WhatsApp mobile number.",
+    gateBackLabel: "Back",
+    gateBackLabelAdmin: "Back"
   },
   te: {
     logoSub: "పురుగు మందులు, ఎరువులు మరియు విత్తనాలు",
@@ -326,7 +336,17 @@ const TRANSLATIONS = {
     toastOtpInvalid: "తప్పుడు OTP కోడ్. దయచేసి మళ్లీ ప్రయత్నించండి.",
     profileTitle: "వినియోగదారు ప్రొఫైల్",
     profileRole: "పాత్ర: కస్టమర్",
-    profileLogout: "లాగ్ అవుట్"
+    profileLogout: "లాగ్ అవుట్",
+    gateTitle: "హెచ్.కె.జి.ఎన్. ఏజెన్సీస్ కి స్వాగతం",
+    gateDesc: "కొనసాగడానికి దయచేసి మీ పోర్టల్‌ను ఎంచుకోండి.",
+    choiceCustTitle: "వినియోగదారుని పోర్టల్ (కస్టమర్)",
+    choiceCustDesc: "ధరలు చూడడానికి, స్టాక్ తనిఖీ చేయడానికి మరియు ఆర్డర్లు చేయడానికి లాగిన్ అవ్వండి.",
+    choiceAdminTitle: "అడ్మిన్ పోర్టల్",
+    choiceAdminDesc: "వ్యవసాయ ఉత్పత్తుల కేటలాగ్ మరియు కస్టమర్ ఆర్డర్లను నిర్వహించండి.",
+    custAuthTitle: "కస్టమర్ లాగిన్",
+    custAuthDesc: "గూగుల్ లేదా వాట్సాప్ మొబైల్ సంఖ్య ద్వారా లాగిన్ అవ్వండి.",
+    gateBackLabel: "వెనుకకు",
+    gateBackLabelAdmin: "వెనుకకు"
   }
 };
 
@@ -423,6 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
   syncDOMTheme();
   renderApp();
   renderAuthHeader();
+  checkGateVisibility();
 
   // Async background sync with global cloud database
   syncProductsFromCloud();
@@ -703,13 +724,21 @@ function toggleRole() {
   if (state.role === "admin") {
     // Log out admin
     state.role = "user";
-    localStorage.removeItem("hkgn_role"); // Clean any old persistent role
+    localStorage.removeItem("hkgn_role");
     state.checkoutActive = false;
     showToast(dict.toastAdminLogout);
     renderApp();
+    checkGateVisibility();
   } else {
-    // Open password login gate
-    openAdminLoginModal();
+    // Log out customer if logged in, then open admin login gate
+    state.user = null;
+    localStorage.removeItem("hkgn_user");
+    renderAuthHeader();
+    renderApp();
+    
+    // Show gate and switch to admin login card
+    checkGateVisibility();
+    switchGateView('admin');
   }
 }
 
@@ -859,13 +888,46 @@ function renderTranslations() {
   document.getElementById("restoreModalConfirm").textContent = dict.restoreModalConfirm;
   document.getElementById("restoreModalDeletePerm").textContent = dict.restoreModalDeletePerm;
 
-  // Admin Login modal
-  document.getElementById("adminLoginTitle").textContent = dict.adminLoginTitle;
-  document.getElementById("adminLoginDesc").textContent = dict.adminLoginDesc;
-  document.getElementById("lblAdminPhone").textContent = dict.lblAdminPhone;
-  document.getElementById("lblAdminPass").textContent = dict.lblAdminPass;
-  document.getElementById("btnAdminLoginCancel").textContent = dict.btnAdminLoginCancel;
-  document.getElementById("btnAdminLoginSubmit").textContent = dict.btnAdminLoginSubmit;
+  // Landing Portal Gate translations
+  const gateTitleEl = document.getElementById("gateTitle");
+  if (gateTitleEl) {
+    try {
+      gateTitleEl.textContent = dict.gateTitle;
+      document.getElementById("gateDesc").textContent = dict.gateDesc;
+      document.getElementById("choiceCustTitle").textContent = dict.choiceCustTitle;
+      document.getElementById("choiceCustDesc").textContent = dict.choiceCustDesc;
+      document.getElementById("choiceAdminTitle").textContent = dict.choiceAdminTitle;
+      document.getElementById("choiceAdminDesc").textContent = dict.choiceAdminDesc;
+      document.getElementById("custAuthTitle").textContent = dict.custAuthTitle;
+      document.getElementById("custAuthDesc").textContent = dict.custAuthDesc;
+      document.getElementById("gateBackLabel").textContent = dict.gateBackLabel;
+      document.getElementById("gateBackLabelAdmin").textContent = dict.gateBackLabelAdmin;
+
+      document.getElementById("adminLoginTitle").textContent = dict.adminLoginTitle;
+      document.getElementById("adminLoginDesc").textContent = dict.adminLoginDesc;
+      document.getElementById("lblAdminPhone").textContent = dict.lblAdminPhone;
+      document.getElementById("lblAdminPass").textContent = dict.lblAdminPass;
+      document.getElementById("btnAdminLoginSubmit").textContent = dict.btnAdminLoginSubmit;
+
+      document.getElementById("labelGoogleMock").textContent = dict.labelGoogleMock;
+      document.getElementById("authDividerText").textContent = dict.authDividerText;
+      document.getElementById("phoneAuthTitle").textContent = dict.phoneAuthTitle;
+      document.getElementById("authPhoneNumber").placeholder = dict.placeholderPhone;
+      
+      // Maintain correct label based on OTP state
+      if (!state.otpState.sent) {
+        document.getElementById("btnSendOtpText").textContent = dict.btnSendOtp;
+      }
+      
+      document.getElementById("otpHint").textContent = dict.otpHint;
+      document.getElementById("btnResendOtp").textContent = dict.btnResendOtp;
+      document.getElementById("btnVerifyOtpText").textContent = dict.btnVerifyOtpText;
+      document.getElementById("waFallbackHint").textContent = dict.waFallbackHint;
+      document.getElementById("btnWaVerifyText").textContent = dict.btnWaVerifyText;
+    } catch (err) {
+      console.warn("Gate elements missing or failed to translate:", err);
+    }
+  }
 
   // Admin Orders tab
   document.getElementById("tabOrders").textContent = dict.tabOrders;
@@ -1943,11 +2005,9 @@ function handleAdminLoginSubmit(e) {
     localStorage.removeItem("hkgn_role"); // Never persist admin role across sessions
     state.checkoutActive = false;
     
-    // Close modal
-    document.getElementById("adminLoginModal").classList.remove("active");
-    
     showToast(dict.toastAdminLoginSuccess);
     renderApp();
+    checkGateVisibility();
   } else {
     showToast(dict.toastAdminLoginFail, true);
   }
@@ -2006,13 +2066,12 @@ function handleGoogleCredentialResponse(response) {
 
     localStorage.setItem("hkgn_user", JSON.stringify(state.user));
     
-    toggleAuthModal(false);
-
     const dict = TRANSLATIONS[state.language];
     showToast(dict.toastLoginSuccess.replace("{name}", state.user.name));
 
     renderApp();
     renderAuthHeader();
+    checkGateVisibility();
   } catch (err) {
     console.error("Error processing Google login:", err);
   }
@@ -2028,13 +2087,13 @@ function simulateGoogleLogin() {
   };
 
   localStorage.setItem("hkgn_user", JSON.stringify(state.user));
-  toggleAuthModal(false);
 
   const dict = TRANSLATIONS[state.language];
   showToast(dict.toastLoginSuccess.replace("{name}", state.user.name));
 
   renderApp();
   renderAuthHeader();
+  checkGateVisibility();
 }
 
 function validatePhoneInput(input) {
@@ -2127,7 +2186,7 @@ function handleSendOtp() {
       document.getElementById("phoneInputWrapper").style.display = "none";
       if (btnSend) btnSend.style.display = "none";
 
-      const ADMIN_WHATSAPP = "919985958786";
+      const ADMIN_WHATSAPP = "919391595381";
       const messageText = `I am verifying my mobile number on HKGN Agencies. My OTP code is: ${fallbackOtp}`;
       const deepLink = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(messageText)}`;
       
@@ -2173,81 +2232,61 @@ function startOtpCountdown() {
 }
 
 function handleVerifyOtp() {
-  let otp = "";
-  for (let i = 1; i <= 6; i++) {
-    const digitInput = document.getElementById(`otp${i}`);
-    if (digitInput) otp += digitInput.value;
-  }
+  try {
+    let otp = "";
+    for (let i = 1; i <= 6; i++) {
+      const digitInput = document.getElementById(`otp${i}`);
+      if (digitInput) otp += digitInput.value;
+    }
 
-  const dict = TRANSLATIONS[state.language];
+    const dict = TRANSLATIONS[state.language];
 
-  if (otp.length !== 6) {
-    showToast(dict.toastOtpInvalid || "Please enter all 6 digits.");
-    return;
-  }
+    if (otp.length !== 6) {
+      showToast(dict.toastOtpInvalid || "Please enter all 6 digits.");
+      return;
+    }
 
-  if (otp === state.otpState.otp) {
-    state.user = {
-      name: `Customer (${state.otpState.phone.slice(2)})`,
-      email: "",
-      phone: state.otpState.phone,
-      photo: "",
-      type: "whatsapp"
-    };
+    console.log("Verifying OTP:", otp, "Expected:", state.otpState.otp);
 
-    localStorage.setItem("hkgn_user", JSON.stringify(state.user));
-    
-    clearInterval(state.otpState.countdownInterval);
-    state.otpState = { phone: '', sent: false, otp: '', timer: 0, countdownInterval: null };
+    if (otp === state.otpState.otp) {
+      const phoneVal = state.otpState.phone || "";
+      const slicedPhone = phoneVal.length >= 2 ? phoneVal.slice(2) : phoneVal;
+      
+      state.user = {
+        name: `Customer (${slicedPhone})`,
+        email: "",
+        phone: phoneVal,
+        photo: "",
+        type: "whatsapp"
+      };
 
-    toggleAuthModal(false);
-    showToast(dict.toastLoginSuccess.replace("{name}", state.user.name));
+      console.log("OTP Verified! Saving user:", state.user);
+      localStorage.setItem("hkgn_user", JSON.stringify(state.user));
+      
+      clearInterval(state.otpState.countdownInterval);
+      state.otpState = { phone: '', sent: false, otp: '', timer: 0, countdownInterval: null };
 
-    renderApp();
-    renderAuthHeader();
-  } else {
-    showToast(dict.toastOtpInvalid);
+      showToast(dict.toastLoginSuccess.replace("{name}", state.user.name));
+
+      renderApp();
+      renderAuthHeader();
+      checkGateVisibility();
+    } else {
+      showToast(dict.toastOtpInvalid);
+    }
+  } catch (err) {
+    console.error("Error in handleVerifyOtp:", err);
+    showToast("Error verifying OTP: " + err.message, true);
   }
 }
 
 function toggleAuthModal(show) {
-  state.authModalOpen = show;
-  const modal = document.getElementById("authModal");
-  if (!modal) return;
-
   if (show) {
-    modal.classList.add("active");
-    const phoneInput = document.getElementById("authPhoneNumber");
-    if (phoneInput) {
-      phoneInput.value = "";
-      document.getElementById("btnSendOtp").disabled = true;
-      document.getElementById("btnSendOtp").style.display = "block";
-      document.getElementById("btnSendOtp").textContent = TRANSLATIONS[state.language].btnSendOtp;
-    }
-    document.getElementById("otpVerificationWrapper").style.display = "none";
-    document.getElementById("phoneInputWrapper").style.display = "block";
-    document.getElementById("waFallbackContainer").style.display = "none";
-    for (let i = 1; i <= 6; i++) {
-      const el = document.getElementById(`otp${i}`);
-      if (el) el.value = "";
-    }
-    
-    setTimeout(() => {
-      if (typeof google !== 'undefined') {
-        initGoogleAuth();
-      }
-    }, 100);
+    const gate = document.getElementById("portalGate");
+    if (gate) gate.classList.add("active");
+    switchGateView('customer');
   } else {
-    modal.classList.remove("active");
-    if (state.otpState.countdownInterval) {
-      clearInterval(state.otpState.countdownInterval);
-    }
-  }
-}
-
-function closeAuthModalOnOverlay(e) {
-  if (e.target.id === "authModal") {
-    toggleAuthModal(false);
+    checkGateVisibility();
   }
 }
 
@@ -2317,6 +2356,7 @@ function logoutUser() {
 
   const dict = TRANSLATIONS[state.language];
   showToast(dict.toastLogout);
+  checkGateVisibility();
 }
 
 document.addEventListener("keydown", (e) => {
@@ -2331,4 +2371,70 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
+
+/* ============================================================
+   PORTAL GATE CONTROLLER
+============================================================ */
+function checkGateVisibility() {
+  const gate = document.getElementById("portalGate");
+  if (!gate) return;
+
+  if (state.role === "admin" || state.user) {
+    gate.classList.remove("active");
+  } else {
+    gate.classList.add("active");
+    switchGateView('choice');
+  }
+}
+
+function switchGateView(view) {
+  const choiceView = document.getElementById("gatePortalChoice");
+  const custView = document.getElementById("gateCustomerAuth");
+  const adminView = document.getElementById("gateAdminAuth");
+
+  if (!choiceView || !custView || !adminView) return;
+
+  choiceView.style.display = "none";
+  custView.style.display = "none";
+  adminView.style.display = "none";
+
+  if (view === 'choice') {
+    choiceView.style.display = "block";
+    
+    // Reset forms and states
+    const adminForm = document.getElementById("adminLoginForm");
+    if (adminForm) adminForm.reset();
+
+    const phoneInput = document.getElementById("authPhoneNumber");
+    if (phoneInput) {
+      phoneInput.value = "";
+      const sendBtn = document.getElementById("btnSendOtp");
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.style.display = "block";
+        sendBtn.textContent = TRANSLATIONS[state.language].btnSendOtp;
+      }
+    }
+    document.getElementById("otpVerificationWrapper").style.display = "none";
+    document.getElementById("phoneInputWrapper").style.display = "block";
+    document.getElementById("waFallbackContainer").style.display = "none";
+    for (let i = 1; i <= 6; i++) {
+      const el = document.getElementById(`otp${i}`);
+      if (el) el.value = "";
+    }
+    if (state.otpState.countdownInterval) {
+      clearInterval(state.otpState.countdownInterval);
+    }
+    state.otpState = { phone: '', sent: false, otp: '', timer: 0, countdownInterval: null };
+  } else if (view === 'customer') {
+    custView.style.display = "block";
+    setTimeout(() => {
+      if (typeof google !== 'undefined') {
+        initGoogleAuth();
+      }
+    }, 100);
+  } else if (view === 'admin') {
+    adminView.style.display = "block";
+  }
+}
 
