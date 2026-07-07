@@ -1754,3 +1754,295 @@ button, input, select, textarea {
     justify-content: center;
   }
 }
+
+/* ============================================================
+   USER AUTHENTICATION MODEL STYLES
+============================================================ */
+.auth-container {
+  display: flex;
+  align-items: center;
+}
+
+.auth-login-btn {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: var(--primary-color) !important;
+}
+
+.auth-login-btn:hover {
+  background: rgba(16, 185, 129, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+.user-profile-dropdown {
+  position: relative;
+}
+
+.user-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--panel-border) !important;
+}
+
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--primary-color);
+}
+
+.user-avatar-initials {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.user-header-name {
+  max-width: 80px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.85rem;
+}
+
+/* Profile Dropdown Card */
+.profile-dropdown-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.profile-dropdown-card.active {
+  display: flex;
+}
+
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.profile-card-header .user-avatar,
+.profile-card-header .user-avatar-initials {
+  width: 38px;
+  height: 38px;
+  font-size: 1.2rem;
+}
+
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.profile-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Auth Modal Specifics */
+.auth-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-subtitle {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.auth-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.google-auth-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#googleButtonContainer {
+  width: 100%;
+}
+
+.google-mock-btn {
+  width: 100%;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--panel-border);
+}
+
+.google-mock-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.auth-divider::before {
+  margin-right: .5em;
+}
+
+.auth-divider::after {
+  margin-left: .5em;
+}
+
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2px 12px;
+  transition: var(--transition-smooth);
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.phone-prefix {
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-right: 8px;
+}
+
+.phone-input-wrapper input {
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  width: 100%;
+}
+
+.phone-input-wrapper input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-action-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 12px;
+  font-weight: 600;
+}
+
+/* OTP Code Box */
+.otp-verification-wrapper {
+  animation: slideInDown 0.3s ease-out forwards;
+}
+
+.otp-hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.otp-inputs-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.otp-digit {
+  width: 45px;
+  height: 45px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--primary-color);
+  transition: var(--transition-smooth);
+}
+
+.otp-digit:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.03);
+}
+
+.otp-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.otp-timer {
+  color: var(--text-secondary);
+}
+
+.otp-timer span {
+  font-weight: 700;
+  color: var(--accent-color);
+}
+
+.btn-whatsapp-direct:hover {
+  background-color: #128c7e !important;
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

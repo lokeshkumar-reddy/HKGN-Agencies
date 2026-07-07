@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="style.css?v=2.0.0" />
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="dark-theme">
 
@@ -46,6 +48,9 @@
             👤 <span id="roleLabel">User</span>
           </button>
         </div>
+
+        <!-- User Authentication Card / Sign In Button -->
+        <div class="auth-container" id="authHeaderContainer"></div>
 
         <!-- Theme Toggle -->
         <button class="action-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
@@ -483,6 +488,79 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       USER AUTHENTICATION MODAL
+  ============================================================ -->
+  <div class="modal-overlay" id="authModal" onclick="closeAuthModalOnOverlay(event)">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3 id="authModalTitle">Sign In to Your Account</h3>
+        <span class="close-btn" onclick="toggleAuthModal(false)">&times;</span>
+      </div>
+      
+      <div class="modal-body auth-modal-body">
+        <p class="auth-subtitle" id="authSubtitle">Select a method to log in and unlock fast checkout.</p>
+        
+        <!-- Google login -->
+        <div class="auth-section google-auth-section">
+          <div id="googleButtonContainer"></div>
+          <button class="btn-secondary google-mock-btn" id="btnGoogleMock" onclick="simulateGoogleLogin()">
+            <span class="btn-icon">🌐</span> <span id="labelGoogleMock">Mock Google Sign-In</span>
+          </button>
+        </div>
+
+        <div class="auth-divider">
+          <span id="authDividerText">OR</span>
+        </div>
+
+        <!-- WhatsApp OTP Login -->
+        <div class="auth-section phone-auth-section">
+          <h4 id="phoneAuthTitle">Sign In via WhatsApp Mobile</h4>
+          
+          <div class="phone-input-wrapper" id="phoneInputWrapper">
+            <span class="phone-prefix">+91</span>
+            <input type="tel" id="authPhoneNumber" placeholder="Enter 10-digit mobile number" maxlength="10" oninput="validatePhoneInput(this)" />
+          </div>
+          
+          <button class="btn-primary auth-action-btn" id="btnSendOtp" onclick="handleSendOtp()" disabled>
+            <span id="btnSendOtpText">Send OTP Code</span>
+          </button>
+          
+          <!-- OTP Verification Area (Hidden by default) -->
+          <div class="otp-verification-wrapper" id="otpVerificationWrapper" style="display: none;">
+            <p class="otp-hint" id="otpHint">Enter the 6-digit code sent to your WhatsApp number.</p>
+            <div class="otp-inputs-row">
+              <input type="text" class="otp-digit" maxlength="1" oninput="handleOtpInputFocus(this, 1)" id="otp1" />
+              <input type="text" class="otp-digit" maxlength="1" oninput="handleOtpInputFocus(this, 2)" id="otp2" />
+              <input type="text" class="otp-digit" maxlength="1" oninput="handleOtpInputFocus(this, 3)" id="otp3" />
+              <input type="text" class="otp-digit" maxlength="1" oninput="handleOtpInputFocus(this, 4)" id="otp4" />
+              <input type="text" class="otp-digit" maxlength="1" oninput="handleOtpInputFocus(this, 5)" id="otp5" />
+              <input type="text" class="otp-digit" maxlength="1" oninput="handleOtpInputFocus(this, 6)" id="otp6" />
+            </div>
+            
+            <div class="otp-meta">
+              <span class="otp-timer" id="otpTimerText">Resend OTP in: <span id="otpCountdown">30</span>s</span>
+              <button class="btn-text" id="btnResendOtp" onclick="handleSendOtp()" style="display: none;">Resend OTP</button>
+            </div>
+
+            <!-- WhatsApp Deep-Link Fallback -->
+            <div class="wa-fallback-container" id="waFallbackContainer" style="display: none; margin-top: 15px; text-align: center;">
+              <p class="wa-fallback-hint" id="waFallbackHint" style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 8px;">Didn't receive the message? Open WhatsApp directly to verify instantly:</p>
+              <a href="#" target="_blank" class="btn-whatsapp-direct" id="lnkWaVerify" style="display: inline-block; background-color: #25d366; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                💬 <span id="btnWaVerifyText">Verify via WhatsApp</span>
+              </a>
+            </div>
+
+            <button class="btn-primary auth-action-btn" id="btnVerifyOtp" onclick="handleVerifyOtp()" style="margin-top: 15px;">
+              <span id="btnVerifyOtpText">Verify & Login</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 

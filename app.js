@@ -140,7 +140,30 @@ const TRANSLATIONS = {
     addProductModalTitleEdit: "Edit Product",
     addProductModalDescEdit: "Modify the details of this product listing. All changes sync immediately to all customers.",
     btnAddProdSubmitEdit: "Update Product",
-    toastProductUpdated: "Product {name} updated successfully!"
+    toastProductUpdated: "Product {name} updated successfully!",
+    btnSignIn: "👤 Sign In",
+    authModalTitle: "Sign In to Your Account",
+    authSubtitle: "Log in to save bookings and enjoy faster checkout.",
+    labelGoogleMock: "Google Fast Login",
+    authDividerText: "OR",
+    phoneAuthTitle: "Sign In via WhatsApp Mobile",
+    placeholderPhone: "Enter 10-digit mobile number",
+    btnSendOtp: "Send OTP via WhatsApp",
+    btnSendOtpTextSending: "Sending...",
+    otpHint: "Enter the 6-digit code sent to your WhatsApp:",
+    otpTimerText: "Resend OTP in: <span id=\"otpCountdown\">{time}</span>s",
+    btnResendOtp: "Resend OTP",
+    waFallbackHint: "Didn't receive the OTP? Open WhatsApp to verify instantly:",
+    btnWaVerifyText: "Verify via WhatsApp App",
+    btnVerifyOtpText: "Verify & Login",
+    toastLoginSuccess: "Welcome back, {name}!",
+    toastLogout: "Logged out successfully.",
+    toastOtpSent: "Verification code sent to your WhatsApp!",
+    toastOtpResent: "Verification code resent!",
+    toastOtpInvalid: "Invalid OTP code. Please try again.",
+    profileTitle: "User Profile",
+    profileRole: "Role: Customer",
+    profileLogout: "Log Out"
   },
   te: {
     logoSub: "పురుగు మందులు, ఎరువులు మరియు విత్తనాలు",
@@ -280,7 +303,30 @@ const TRANSLATIONS = {
     addProductModalTitleEdit: "ఉత్పత్తిని సవరించు",
     addProductModalDescEdit: "ఈ ఉత్పత్తి యొక్క వివరాలను మార్చండి. అన్ని మార్పులు కస్టమర్లందరికీ వెంటనే సమకాలీకరించబడతాయి.",
     btnAddProdSubmitEdit: "ఉత్పత్తిని నవీకరించు",
-    toastProductUpdated: "ఉత్పత్తి {name} విజయవంతంగా నవీకరించబడింది!"
+    toastProductUpdated: "ఉత్పత్తి {name} విజయవంతంగా నవీకరించబడింది!",
+    btnSignIn: "👤 లాగిన్",
+    authModalTitle: "మీ ఖాతాకు లాగిన్ అవ్వండి",
+    authSubtitle: "బుకింగ్‌లను సేవ్ చేయడానికి మరియు వేగంగా కొనుగోలు చేయడానికి లాగిన్ అవ్వండి.",
+    labelGoogleMock: "గూగుల్ లాగిన్",
+    authDividerText: "లేదా",
+    phoneAuthTitle: "వాట్సాప్ మొబైల్ ద్వారా లాగిన్",
+    placeholderPhone: "10 అంకెల మొబైల్ సంఖ్య నమోదు చేయండి",
+    btnSendOtp: "వాట్సాప్‌కు OTP పంపండి",
+    btnSendOtpTextSending: "పంపుతోంది...",
+    otpHint: "మీ వాట్సాప్‌కు పంపిన 6 అంకెల కోడ్‌ను నమోదు చేయండి:",
+    otpTimerText: "మళ్లీ OTP పంపడానికి సమయం: <span id=\"otpCountdown\">{time}</span>సె",
+    btnResendOtp: "తిరిగి OTP పంపు",
+    waFallbackHint: "OTP రాలేదా? తక్షణమే వెరిఫై చేయడానికి నేరుగా వాట్సాప్ తెరవండి:",
+    btnWaVerifyText: "వాట్సాప్ యాప్ ద్వారా వెరిఫై చేయి",
+    btnVerifyOtpText: "వెరిఫై & లాగిన్",
+    toastLoginSuccess: "స్వాగతం, {name}!",
+    toastLogout: "విజయవంతంగా లాగిన్ అవుట్ అయ్యారు.",
+    toastOtpSent: "వెరిఫికేషన్ కోడ్ మీ వాట్సాప్‌కు పంపబడింది!",
+    toastOtpResent: "వెరిఫికేషన్ కోడ్ తిరిగి పంపబడింది!",
+    toastOtpInvalid: "తప్పుడు OTP కోడ్. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    profileTitle: "వినియోగదారు ప్రొఫైల్",
+    profileRole: "పాత్ర: కస్టమర్",
+    profileLogout: "లాగ్ అవుట్"
   }
 };
 
@@ -357,7 +403,16 @@ let state = {
   uploadedImageBase64: null,
   restoreTargetProduct: null,
   editingProductId: null,
-  orders: []
+  orders: [],
+  user: null,
+  authModalOpen: false,
+  otpState: {
+    phone: '',
+    sent: false,
+    otp: '',
+    timer: 0,
+    countdownInterval: null
+  }
 };
 
 /* ============================================================
@@ -367,6 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStateFromStorage();
   syncDOMTheme();
   renderApp();
+  renderAuthHeader();
 
   // Async background sync with global cloud database
   syncProductsFromCloud();
@@ -414,6 +470,16 @@ function loadStateFromStorage() {
   state.language = localStorage.getItem("hkgn_lang") || "en";
   state.role = "user"; // Always default to User Portal on startup
   state.theme = localStorage.getItem("hkgn_theme") || "dark";
+
+  // User Authentication
+  const savedUser = localStorage.getItem("hkgn_user");
+  if (savedUser) {
+    try {
+      state.user = JSON.parse(savedUser);
+    } catch (e) {
+      state.user = null;
+    }
+  }
 }
 
 function saveProductsToStorage() {
@@ -629,6 +695,7 @@ function setLanguage(lang) {
   renderCartDrawer();
   renderCheckoutView();
   renderAdminPanel();
+  renderAuthHeader();
 }
 
 function toggleRole() {
@@ -1129,6 +1196,22 @@ function renderCheckoutView() {
   const totalVal = document.getElementById("chkTotalVal");
   const lockedDisplay = document.getElementById("lockedAmountDisplay");
   const dict = TRANSLATIONS[state.language];
+
+  // Auto-fill logged in user details if elements exist and fields are empty
+  if (state.user) {
+    const nameInput = document.getElementById("custName");
+    const mobileInput = document.getElementById("custMobile");
+    
+    if (nameInput && !nameInput.value) {
+      nameInput.value = state.user.name;
+    }
+    if (mobileInput && !mobileInput.value && state.user.phone) {
+      const cleanPhone = state.user.phone.startsWith("91") && state.user.phone.length === 12
+        ? state.user.phone.slice(2)
+        : state.user.phone;
+      mobileInput.value = cleanPhone;
+    }
+  }
 
   if (state.cart.length === 0) {
     listContainer.innerHTML = `<p class="text-center" style="color:var(--text-secondary);">${dict.emptyCartText}</p>`;
@@ -1869,3 +1952,383 @@ function handleAdminLoginSubmit(e) {
     showToast(dict.toastAdminLoginFail, true);
   }
 }
+
+/* ============================================================
+   USER AUTHENTICATION MODEL (GOOGLE & WHATSAPP OTP)
+============================================================ */
+const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+
+function initGoogleAuth() {
+  if (typeof google === 'undefined') return;
+
+  try {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredentialResponse,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+
+    const container = document.getElementById("googleButtonContainer");
+    if (container) {
+      google.accounts.id.renderButton(
+        container,
+        { theme: "outline", size: "large", width: "100%", shape: "pill" }
+      );
+    }
+
+    if (!state.user) {
+      google.accounts.id.prompt();
+    }
+  } catch (err) {
+    console.log("Google Auth Initialization Error:", err);
+  }
+}
+
+function handleGoogleCredentialResponse(response) {
+  try {
+    const credential = response.credential;
+    const base64Url = credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const payload = JSON.parse(jsonPayload);
+    
+    state.user = {
+      name: payload.name || "Google User",
+      email: payload.email,
+      phone: "",
+      photo: payload.picture || "",
+      type: "google"
+    };
+
+    localStorage.setItem("hkgn_user", JSON.stringify(state.user));
+    
+    toggleAuthModal(false);
+
+    const dict = TRANSLATIONS[state.language];
+    showToast(dict.toastLoginSuccess.replace("{name}", state.user.name));
+
+    renderApp();
+    renderAuthHeader();
+  } catch (err) {
+    console.error("Error processing Google login:", err);
+  }
+}
+
+function simulateGoogleLogin() {
+  state.user = {
+    name: "Suresh Kumar",
+    email: "suresh.kumar@gmail.com",
+    phone: "919988776655",
+    photo: "https://lh3.googleusercontent.com/a/default-user=s96-c",
+    type: "google"
+  };
+
+  localStorage.setItem("hkgn_user", JSON.stringify(state.user));
+  toggleAuthModal(false);
+
+  const dict = TRANSLATIONS[state.language];
+  showToast(dict.toastLoginSuccess.replace("{name}", state.user.name));
+
+  renderApp();
+  renderAuthHeader();
+}
+
+function validatePhoneInput(input) {
+  input.value = input.value.replace(/\D/g, '').slice(0, 10);
+  const btn = document.getElementById("btnSendOtp");
+  if (btn) {
+    btn.disabled = input.value.length !== 10;
+  }
+}
+
+function handleOtpInputFocus(input, index) {
+  input.value = input.value.replace(/\D/g, '');
+  if (input.value.length === 1 && index < 6) {
+    const nextInput = document.getElementById(`otp${index + 1}`);
+    if (nextInput) nextInput.focus();
+  }
+}
+
+function handleSendOtp() {
+  const phoneInput = document.getElementById("authPhoneNumber");
+  if (!phoneInput) return;
+
+  const phone = phoneInput.value.trim();
+  if (phone.length !== 10) return;
+
+  const btnSend = document.getElementById("btnSendOtp");
+  const dict = TRANSLATIONS[state.language];
+
+  if (btnSend) {
+    btnSend.disabled = true;
+    btnSend.textContent = dict.btnSendOtpTextSending || "Sending...";
+  }
+
+  const fullPhone = "91" + phone;
+
+  // Hit Vercel Serverless Function /api/send-otp
+  const targetUrl = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? `${window.location.origin}/api/send-otp`
+    : "/api/send-otp";
+
+  fetch(targetUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ phone: fullPhone })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        state.otpState.phone = fullPhone;
+        state.otpState.otp = data.otp;
+        state.otpState.sent = true;
+        
+        document.getElementById("otpVerificationWrapper").style.display = "block";
+        document.getElementById("phoneInputWrapper").style.display = "none";
+        if (btnSend) btnSend.style.display = "none";
+
+        const lnkWaVerify = document.getElementById("lnkWaVerify");
+        const waFallbackContainer = document.getElementById("waFallbackContainer");
+        if (lnkWaVerify && data.deepLink) {
+          lnkWaVerify.href = data.deepLink;
+          if (waFallbackContainer) {
+            waFallbackContainer.style.display = "block";
+          }
+        }
+
+        showToast(dict.toastOtpSent);
+        startOtpCountdown();
+        
+        const firstOtp = document.getElementById("otp1");
+        if (firstOtp) firstOtp.focus();
+      } else {
+        showToast("Error: " + (data.error || "Failed to send OTP."));
+        if (btnSend) {
+          btnSend.disabled = false;
+          btnSend.textContent = dict.btnSendOtp;
+        }
+      }
+    })
+    .catch(err => {
+      console.error("Error sending OTP:", err);
+      // Fallback offline simulation
+      const fallbackOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      state.otpState.phone = fullPhone;
+      state.otpState.otp = fallbackOtp;
+      state.otpState.sent = true;
+
+      document.getElementById("otpVerificationWrapper").style.display = "block";
+      document.getElementById("phoneInputWrapper").style.display = "none";
+      if (btnSend) btnSend.style.display = "none";
+
+      const ADMIN_WHATSAPP = "919985958786";
+      const messageText = `I am verifying my mobile number on HKGN Agencies. My OTP code is: ${fallbackOtp}`;
+      const deepLink = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(messageText)}`;
+      
+      const lnkWaVerify = document.getElementById("lnkWaVerify");
+      const waFallbackContainer = document.getElementById("waFallbackContainer");
+      if (lnkWaVerify) {
+        lnkWaVerify.href = deepLink;
+        if (waFallbackContainer) waFallbackContainer.style.display = "block";
+      }
+
+      showToast(`${dict.toastOtpSent} (Simulated OTP: ${fallbackOtp})`);
+      startOtpCountdown();
+      
+      const firstOtp = document.getElementById("otp1");
+      if (firstOtp) firstOtp.focus();
+    });
+}
+
+function startOtpCountdown() {
+  if (state.otpState.countdownInterval) {
+    clearInterval(state.otpState.countdownInterval);
+  }
+
+  state.otpState.timer = 30;
+  const countdownEl = document.getElementById("otpCountdown");
+  const timerTextEl = document.getElementById("otpTimerText");
+  const btnResend = document.getElementById("btnResendOtp");
+
+  if (timerTextEl) timerTextEl.style.display = "block";
+  if (btnResend) btnResend.style.display = "none";
+  if (countdownEl) countdownEl.textContent = state.otpState.timer;
+
+  state.otpState.countdownInterval = setInterval(() => {
+    state.otpState.timer--;
+    if (countdownEl) countdownEl.textContent = state.otpState.timer;
+
+    if (state.otpState.timer <= 0) {
+      clearInterval(state.otpState.countdownInterval);
+      if (timerTextEl) timerTextEl.style.display = "none";
+      if (btnResend) btnResend.style.display = "block";
+    }
+  }, 1000);
+}
+
+function handleVerifyOtp() {
+  let otp = "";
+  for (let i = 1; i <= 6; i++) {
+    const digitInput = document.getElementById(`otp${i}`);
+    if (digitInput) otp += digitInput.value;
+  }
+
+  const dict = TRANSLATIONS[state.language];
+
+  if (otp.length !== 6) {
+    showToast(dict.toastOtpInvalid || "Please enter all 6 digits.");
+    return;
+  }
+
+  if (otp === state.otpState.otp) {
+    state.user = {
+      name: `Customer (${state.otpState.phone.slice(2)})`,
+      email: "",
+      phone: state.otpState.phone,
+      photo: "",
+      type: "whatsapp"
+    };
+
+    localStorage.setItem("hkgn_user", JSON.stringify(state.user));
+    
+    clearInterval(state.otpState.countdownInterval);
+    state.otpState = { phone: '', sent: false, otp: '', timer: 0, countdownInterval: null };
+
+    toggleAuthModal(false);
+    showToast(dict.toastLoginSuccess.replace("{name}", state.user.name));
+
+    renderApp();
+    renderAuthHeader();
+  } else {
+    showToast(dict.toastOtpInvalid);
+  }
+}
+
+function toggleAuthModal(show) {
+  state.authModalOpen = show;
+  const modal = document.getElementById("authModal");
+  if (!modal) return;
+
+  if (show) {
+    modal.classList.add("active");
+    const phoneInput = document.getElementById("authPhoneNumber");
+    if (phoneInput) {
+      phoneInput.value = "";
+      document.getElementById("btnSendOtp").disabled = true;
+      document.getElementById("btnSendOtp").style.display = "block";
+      document.getElementById("btnSendOtp").textContent = TRANSLATIONS[state.language].btnSendOtp;
+    }
+    document.getElementById("otpVerificationWrapper").style.display = "none";
+    document.getElementById("phoneInputWrapper").style.display = "block";
+    document.getElementById("waFallbackContainer").style.display = "none";
+    for (let i = 1; i <= 6; i++) {
+      const el = document.getElementById(`otp${i}`);
+      if (el) el.value = "";
+    }
+    
+    setTimeout(() => {
+      if (typeof google !== 'undefined') {
+        initGoogleAuth();
+      }
+    }, 100);
+  } else {
+    modal.classList.remove("active");
+    if (state.otpState.countdownInterval) {
+      clearInterval(state.otpState.countdownInterval);
+    }
+  }
+}
+
+function closeAuthModalOnOverlay(e) {
+  if (e.target.id === "authModal") {
+    toggleAuthModal(false);
+  }
+}
+
+function renderAuthHeader() {
+  const container = document.getElementById("authHeaderContainer");
+  if (!container) return;
+
+  const dict = TRANSLATIONS[state.language];
+
+  if (state.user) {
+    const avatar = state.user.photo 
+      ? `<img src="${state.user.photo}" alt="${state.user.name}" class="user-avatar" />`
+      : `<div class="user-avatar-initials">${state.user.name.charAt(0).toUpperCase()}</div>`;
+
+    container.innerHTML = `
+      <div class="user-profile-dropdown">
+        <button class="role-badge user-profile-btn" onclick="toggleProfileDropdown(event)">
+          ${avatar}
+          <span class="user-header-name">${state.user.name.split(' ')[0]}</span>
+        </button>
+        <div class="profile-dropdown-card glass-card" id="profileDropdownCard">
+          <div class="profile-card-header">
+            ${avatar}
+            <div class="profile-meta">
+              <span class="profile-name">${state.user.name}</span>
+              <span class="profile-sub">${state.user.email || state.user.phone || ''}</span>
+            </div>
+          </div>
+          <div class="profile-card-actions">
+            <button class="btn-secondary btn-sm" onclick="logoutUser()" style="width: 100%; justify-content: center; margin-top: 10px;">
+              <span>🚪</span> ${dict.profileLogout || 'Log Out'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <button class="role-badge auth-login-btn" onclick="toggleAuthModal(true)">
+        🔑 <span>${dict.btnSignIn || 'Sign In'}</span>
+      </button>
+    `;
+  }
+}
+
+function toggleProfileDropdown(e) {
+  e.stopPropagation();
+  const card = document.getElementById("profileDropdownCard");
+  if (card) {
+    card.classList.toggle("active");
+  }
+}
+
+document.addEventListener("click", (e) => {
+  const card = document.getElementById("profileDropdownCard");
+  if (card && card.classList.contains("active") && !e.target.closest(".user-profile-dropdown")) {
+    card.classList.remove("active");
+  }
+});
+
+function logoutUser() {
+  state.user = null;
+  localStorage.removeItem("hkgn_user");
+  
+  renderApp();
+  renderAuthHeader();
+
+  const dict = TRANSLATIONS[state.language];
+  showToast(dict.toastLogout);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.target && e.target.classList.contains("otp-digit") && e.key === "Backspace" && !e.target.value) {
+    const index = parseInt(e.target.id.replace("otp", ""));
+    if (index > 1) {
+      const prevInput = document.getElementById(`otp${index - 1}`);
+      if (prevInput) {
+        prevInput.focus();
+        prevInput.value = "";
+      }
+    }
+  }
+});
+
